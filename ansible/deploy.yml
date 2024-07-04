@@ -1,0 +1,79 @@
+# ---
+# - name: Deploy SonarQube and PostgreSQL with Docker Compose
+#   hosts: web-servers
+#   become: yes
+#   tasks:
+#     - name: Install Docker Compose
+#       apt:
+#         name: docker-compose
+#         state: present
+#       become: yes
+#       tags:
+#         - docker
+
+#     - name: Ensure directory exists for Docker Compose file
+#       file:
+#         path: /pwc/sonarqube-postgresql
+#         state: directory
+#       tags:
+#         - docker
+
+#     - name: Copy Docker Compose file
+#       copy:
+#         src: /home/hannora/Desktop/pwc-task-one/docker/docker-compose.yml
+#         dest: /pwc/sonarqube-postgresql/docker-compose.yml
+#         mode: '0600'  # Set permissions to 600
+#       tags: 
+#         - docker
+
+#     - name: Start Docker containers with Docker Compose
+#       community.docker.docker_compose_v2:
+#         project_src: /pwc/sonarqube-postgresql
+#         files:
+#         - docker-compose.yml
+
+
+---
+- name: Deploy SonarQube and PostgreSQL with Docker Compose
+  hosts: web-servers
+  become: yes
+  tasks:
+
+    - name: Ensure directory exists for Docker Compose files
+      ansible.builtin.file:
+        path: /pwc/sonarqube-postgresql
+        state: directory
+        mode: '0755'  # Set permissions to 755 for directories
+      tags:
+        - docker
+
+    - name: Copy Docker Compose file
+      ansible.builtin.copy:
+        src: /home/hannora/Desktop/pwc-task-one/docker/docker-compose.yml
+        dest: /pwc/sonarqube-postgresql/docker-compose.yml
+        mode: '0644'  # Set permissions to 644 for files
+      tags:
+        - docker
+
+    - name: Copy Dockerfile
+      ansible.builtin.copy:
+        src: /home/hannora/Desktop/pwc-task-one/docker/Dockerfile
+        dest: /pwc/sonarqube-postgresql/Dockerfile
+        mode: '0644'  # Set permissions to 644 for files
+      tags:
+        - docker
+
+    - name: Copy sonar.properties file
+      ansible.builtin.copy:
+        src: /home/hannora/Desktop/pwc-task-one/docker/sonar.properties
+        dest: /pwc/sonarqube-postgresql/sonar.properties
+        mode: '0644'  # Set permissions to 644 for files
+      tags:
+        - docker
+
+    - name: Start Docker containers with Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: /pwc/sonarqube-postgresql
+        state: present
+      tags:
+        - docker

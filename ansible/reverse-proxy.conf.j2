@@ -1,0 +1,12 @@
+server {
+    listen 80;
+
+    location /sonarqube {
+        proxy_pass http://localhost:9000/sonarqube;
+    }
+
+    location /apache/ {
+        proxy_pass http://localhost:5000/;
+
+    }
+}

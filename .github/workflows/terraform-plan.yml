@@ -1,0 +1,28 @@
+name: Terraform Plan and Apply
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: 'us-east-1'
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Cloud Apply
+        env:
+          TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
+        run: terraform cloud apply -auto-approve tfplan

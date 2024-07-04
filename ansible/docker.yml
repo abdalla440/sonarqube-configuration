@@ -1,0 +1,70 @@
+---
+# Playbook to install and configure Docker
+
+- hosts: web-servers
+  become: yes  # Run commands with sudo
+
+  tasks:
+    - name: Ensure apt cache is updated
+      apt:
+        update_cache: yes
+
+    - name: Install dependencies
+      apt:
+        name: "{{ item }}"
+        state: present  # Ensure each dependency is installed
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg-agent
+        - software-properties-common
+
+    - name: Add Docker's official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present  # Ensure the GPG key is added
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present  # Ensure the Docker repository is added
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present  # Ensure Docker is installed
+
+    - name: Install Docker CLI tools
+      apt:
+        name: docker-ce-cli
+        state: present  # Ensure Docker CLI tools are installed
+
+    - name: Install Docker Compose
+      apt:
+        name: docker-compose
+        state: present  # Ensure Docker Compose is installed
+
+    - name: Add user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes  # Add the user to the Docker group
+
+    - name: Enable Docker service
+      systemd:
+        name: docker
+        enabled: yes  # Ensure Docker is enabled on boot
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started  # Ensure Docker service is started
+
+    - name: Verify Docker installation
+      command: docker --version
+      register: docker_version
+
+    - name: Print Docker version
+      debug:
+        msg: "Docker version installed: {{ docker_version.stdout }}"
