@@ -1,29 +1,54 @@
-name: Terraform Plan and Apply
+name: Deploy Infrastructure and Configure with Ansible
+
 on:
   push:
     branches:
-      - main 
+      - main
 
 jobs:
   terraform:
+    name: "Terraform"
     runs-on: ubuntu-latest
-    # env:
-      # AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      # AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      # AWS_REGION: 'us-east-1'
-      
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+  
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Plan
-        run: terraform plan 
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
 
-      - name: Terraform Cloud Apply
-        env:
-          TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
-        run: terraform cloud apply -auto-approve 
+      - name: Insert machine IP
+        run: |
+          machine_ip=$(terraform output -raw elastic_ip)
+          sed -i "/^\[web-servers\]/a server1 ansible_host=${machine_ip} ansible_user=ubuntu" ansible/inventory.ini
 
+
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+  
+      - name: Install Ansible
+        run: |
+          sudo apt-add-repository ppa:ansible/ansible
+          sudo apt update
+          sudo apt-get install -y ansible
+  
+      - name: Run Ansible Playbook
+        run: |
+          cd ansible
+          ansible-playbook -i inventory playbook.yaml
