@@ -27,7 +27,9 @@ jobs:
         run: terraform init
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: | 
+          cat main.tf
+          terraform apply -auto-approve
 
       - name: Insert machine IP
         run: |
