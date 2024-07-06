@@ -28,8 +28,9 @@ jobs:
         working-directory: terraform
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
-        working-directory: terraform
+        run: |
+          cd terraform
+          terraform apply -auto-approve
 
       - name: Insert machine IP
         run: |
