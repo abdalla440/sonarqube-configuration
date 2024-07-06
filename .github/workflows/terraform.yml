@@ -54,4 +54,3 @@ jobs:
           ansible-playbook -i inventory.ini docker.yml
           ansible-playbook -i inventory.ini deploy.yml
           ansible-playbook -i inventory.ini nginx_configuration.yml
-        working-directory: ansible
