@@ -22,21 +22,21 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-          
+        working-directory: terraform
+  
       - name: Terraform Init
-        run: |
-          cd terraform
-          terraform init
+        run: terraform init
+        working-directory: terraform
 
       - name: Terraform Apply
-        run: |
-          cd terraform
-          terraform apply -auto-approve
+        run: terraform apply -auto-approve
+        working-directory: terraform
 
       - name: Insert machine IP
         run: |
           machine_ip=$(terraform output -raw elastic_ip)
           sed -i "/^\[web-servers\]/a server1 ansible_host=${machine_ip} ansible_user=ubuntu" ../ansible/inventory.ini
+        working-directory: terraform
 
       - name: Set up SSH key
         run: |
@@ -52,9 +52,9 @@ jobs:
   
       - name: Run Ansible Playbooks
         run: |
-          cd ansible
           ansible-playbook -i inventory.ini nginx.yml
           ansible-playbook -i inventory.ini apache.yml
           ansible-playbook -i inventory.ini docker.yml
           ansible-playbook -i inventory.ini deploy.yml
           ansible-playbook -i inventory.ini nginx_configuration.yml
+        working-directory: ansible
