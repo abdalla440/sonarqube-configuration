@@ -26,12 +26,17 @@ jobs:
       - name: enter terraform directory
         run: |
           cd terraform/
+          pwd
           
       - name: Terraform Init
-        run: terraform init
+        run: |
+          pwd
+          terraform init
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: |
+          pwd
+          terraform apply -auto-approve
 
       - name: Insert machine IP
         run: |
