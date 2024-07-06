@@ -25,18 +25,14 @@ jobs:
   
       - name: Terraform Init
         run: terraform init
-        working-directory: terraform
 
       - name: Terraform Apply
-        run: |
-          cd terraform
-          terraform apply -auto-approve
+        run: terraform apply -auto-approve
 
       - name: Insert machine IP
         run: |
           machine_ip=$(terraform output -raw elastic_ip)
-          sed -i "/^\[web-servers\]/a server1 ansible_host=${machine_ip} ansible_user=ubuntu" ../ansible/inventory.ini
-        working-directory: terraform
+          sed -i "/^\[web-servers\]/a server1 ansible_host=${machine_ip} ansible_user=ubuntu" ansible/inventory.ini
 
       - name: Set up SSH key
         run: |
@@ -52,6 +48,7 @@ jobs:
   
       - name: Run Ansible Playbooks
         run: |
+          cd ansible
           ansible-playbook -i inventory.ini nginx.yml
           ansible-playbook -i inventory.ini apache.yml
           ansible-playbook -i inventory.ini docker.yml
