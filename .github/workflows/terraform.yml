@@ -25,7 +25,7 @@ jobs:
 
       - name: enter terraform directory
         run: |
-          cd terraform/
+          cd terraform
           pwd
           
       - name: Terraform Init
